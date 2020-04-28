@@ -166,8 +166,13 @@ class BaseExampleGenExecutor(
     json_format.Parse(exec_properties['output_config'], output_config)
     # Get output split names.
     split_names = utils.generate_output_split_names(input_config, output_config)
-
     example_splits = []
+    # Make beam_pipeline_args available in exec_properties since certain
+    # example_gen executors need this information.
+    # TODO(b/155441037): Revisit necessity of this when BigQueryExampleGen
+    # does not branch on project or runner anymore.
+    exec_properties['_beam_pipeline_args'] = self._beam_pipeline_args or []
+
     input_to_example = self.GetInputSourceToExamplePTransform()
     if output_config.split_config.splits:
       # Use output splits, input must have only one split.
