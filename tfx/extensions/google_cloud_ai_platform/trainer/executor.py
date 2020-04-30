@@ -25,7 +25,7 @@ from tfx import types
 from tfx.components.base import base_executor
 from tfx.components.trainer import executor as tfx_trainer_executor
 from tfx.extensions.google_cloud_ai_platform import runner
-
+from tfx.utils import json_utils
 
 # Keys to the items in custom_config passed as a part of exec_properties.
 TRAINING_ARGS_KEY = 'ai_platform_training_args'
@@ -61,7 +61,7 @@ class GenericExecutor(base_executor.BaseExecutor):
       RuntimeError: if the Google Cloud AI Platform training job failed.
     """
     self._log_startup(input_dict, output_dict, exec_properties)
-
+    exec_properties = json_utils.deserialize_custom_config(exec_properties)
     custom_config = exec_properties.get('custom_config', {})
     training_inputs = custom_config.get(TRAINING_ARGS_KEY)
     if training_inputs is None:
@@ -74,7 +74,7 @@ class GenericExecutor(base_executor.BaseExecutor):
     executor_class = self._GetExecutorClass()
     executor_class_path = '%s.%s' % (executor_class.__module__,
                                      executor_class.__name__)
-
+    # Note: exec_properties['custom_config'] here is a dict.
     return runner.start_aip_training(input_dict, output_dict, exec_properties,
                                      executor_class_path, training_inputs,
                                      job_id)

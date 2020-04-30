@@ -24,6 +24,7 @@ from tfx import types
 from tfx.components.pusher import executor as tfx_pusher_executor
 from tfx.types import artifact_utils
 from tfx.utils import io_utils
+from tfx.utils import json_utils
 from tfx.utils import path_utils
 from tfx.utils import telemetry_utils
 
@@ -90,7 +91,10 @@ class Executor(tfx_pusher_executor.Executor):
         input_dict[tfx_pusher_executor.MODEL_KEY])
     model_export_uri = model_export.uri
 
+    exec_properties = json_utils.deserialize_custom_config(exec_properties)
     custom_config = exec_properties.get(_CUSTOM_CONFIG_KEY, {})
+    print(custom_config)
+    print(type(custom_config))
     bigquery_serving_args = custom_config.get(SERVING_ARGS_KEY)
     # if configuration is missing error out
     if bigquery_serving_args is None:

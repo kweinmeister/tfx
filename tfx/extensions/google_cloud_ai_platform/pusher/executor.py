@@ -25,6 +25,7 @@ from tfx.components.pusher import executor as tfx_pusher_executor
 from tfx.extensions.google_cloud_ai_platform import runner
 from tfx.types import artifact_utils
 from tfx.utils import io_utils
+from tfx.utils import json_utils
 from tfx.utils import path_utils
 
 
@@ -76,7 +77,7 @@ class Executor(tfx_pusher_executor.Executor):
     model_export = artifact_utils.get_single_instance(
         input_dict[tfx_pusher_executor.MODEL_KEY])
 
-    exec_properties_copy = exec_properties.copy()
+    exec_properties_copy = json_utils.deserialize_custom_config(exec_properties)
     custom_config = exec_properties_copy.pop(_CUSTOM_CONFIG_KEY, {})
     ai_platform_serving_args = custom_config.get(SERVING_ARGS_KEY)
     if not ai_platform_serving_args:

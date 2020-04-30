@@ -26,6 +26,7 @@ import tensorflow as tf
 from tfx.components.pusher import executor as tfx_pusher_executor
 from tfx.extensions.google_cloud_ai_platform.pusher import executor
 from tfx.types import standard_artifacts
+from tfx.utils import json_utils
 
 
 class ExecutorTest(tf.test.TestCase):
@@ -55,6 +56,8 @@ class ExecutorTest(tf.test.TestCase):
     self._output_dict = {
         tfx_pusher_executor.PUSHED_MODEL_KEY: [self._model_push],
     }
+    # Dict format of exec_properties. custom_config needs to be serialized
+    # before being passed into Do function.
     self._exec_properties = {
         'custom_config': {
             executor.SERVING_ARGS_KEY: {
@@ -86,7 +89,7 @@ class ExecutorTest(tf.test.TestCase):
                                             'model_validator/blessed')
     self._model_blessing.set_int_custom_property('blessed', 1)
     self._executor.Do(self._input_dict, self._output_dict,
-                      self._exec_properties)
+                      json_utils.serialize_custom_config(self._exec_properties))
     executor_class_path = '%s.%s' % (self._executor.__class__.__module__,
                                      self._executor.__class__.__name__)
     mock_runner.deploy_model_for_aip_prediction.assert_called_once_with(
@@ -107,7 +110,7 @@ class ExecutorTest(tf.test.TestCase):
                                             'model_validator/not_blessed')
     self._model_blessing.set_int_custom_property('blessed', 0)
     self._executor.Do(self._input_dict, self._output_dict,
-                      self._exec_properties)
+                      json_utils.serialize_custom_config(self._exec_properties))
     self.assertNotPushed()
     mock_runner.deploy_model_for_aip_prediction.assert_not_called()
 

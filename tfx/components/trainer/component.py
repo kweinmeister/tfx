@@ -17,6 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import json
 from typing import Any, Dict, Optional, Text, Union
 
 import absl
@@ -228,7 +229,7 @@ class Trainer(base_component.BaseComponent):
         module_file=module_file,
         run_fn=run_fn,
         trainer_fn=trainer_fn,
-        custom_config=custom_config,
+        custom_config=json.dumps(custom_config),
         model=output)
     super(Trainer, self).__init__(
         spec=spec,

@@ -92,7 +92,8 @@ class RunnerTest(tf.test.TestCase):
             'args': [
                 '--executor_class_path', class_path, '--inputs', '{}',
                 '--outputs', '{}', '--exec-properties', '{"custom_config": '
-                '{"ai_platform_training_args": {"project": "12345"}}}'
+                '"{\\"ai_platform_training_args\\": {\\"project\\": \\"12345\\"'
+                '}}"}'
             ],
         }, body['trainingInput'])
     self.assertStartsWith(body['jobId'], 'tfx_')
@@ -125,10 +126,10 @@ class RunnerTest(tf.test.TestCase):
             'args': [
                 '--executor_class_path', class_path, '--inputs', '{}',
                 '--outputs', '{}', '--exec-properties', '{"custom_config": '
-                '{"ai_platform_training_args": '
-                '{"masterConfig": {"imageUri": "my-custom-image"}, '
-                '"project": "12345"}, '
-                '"ai_platform_training_job_id": "my_jobid"}}'
+                '"{\\"ai_platform_training_args\\": '
+                '{\\"masterConfig\\": {\\"imageUri\\": \\"my-custom-image\\"}, '
+                '\\"project\\": \\"12345\\"}, '
+                '\\"ai_platform_training_job_id\\": \\"my_jobid\\"}"}'
             ],
         }, body['trainingInput'])
     self.assertEqual(body['jobId'], 'my_jobid')

@@ -36,6 +36,7 @@ from tfx.proto import trainer_pb2
 from tfx.types import artifact_utils
 from tfx.utils import import_utils
 from tfx.utils import io_utils
+from tfx.utils import json_utils
 from tfx.utils import path_utils
 
 # Key for base model in executor input_dict.
@@ -236,8 +237,8 @@ class GenericExecutor(base_executor.BaseExecutor):
         - warm_starting: Whether or not we need to do warm starting.
         - warm_start_from: Optional. If warm_starting is True, this is the
           directory to find previous model to warm start on.
-        - custom_config: Optional. Additional parameters to pass to trainer
-          function.
+        - custom_config: Optional. JSON-serialized dict of additional parameters
+           to pass to trainer function.
 
     Returns:
       None
@@ -249,8 +250,10 @@ class GenericExecutor(base_executor.BaseExecutor):
     """
     self._log_startup(input_dict, output_dict, exec_properties)
 
-    fn_args = self._GetFnArgs(input_dict, output_dict, exec_properties)
-    run_fn = self._GetFn(exec_properties, 'run_fn')
+    exec_properties_copy = json_utils.serialize_custom_config(exec_properties)
+
+    fn_args = self._GetFnArgs(input_dict, output_dict, exec_properties_copy)
+    run_fn = self._GetFn(exec_properties_copy, 'run_fn')
 
     # Train the model
     absl.logging.info('Training model.')
@@ -303,8 +306,8 @@ class Executor(GenericExecutor):
         - warm_starting: Whether or not we need to do warm starting.
         - warm_start_from: Optional. If warm_starting is True, this is the
           directory to find previous model to warm start on.
-        - custom_config: Optional. Additional parameters to pass to trainer
-          function.
+        - custom_config: Optional. JSON-serialized dict of additional parameters
+          to pass to trainer function.
 
     Returns:
       None
@@ -315,8 +318,10 @@ class Executor(GenericExecutor):
     """
     self._log_startup(input_dict, output_dict, exec_properties)
 
-    fn_args = self._GetFnArgs(input_dict, output_dict, exec_properties)
-    trainer_fn = self._GetFn(exec_properties, 'trainer_fn')
+    exec_properties_copy = json_utils.serialize_custom_config(exec_properties)
+
+    fn_args = self._GetFnArgs(input_dict, output_dict, exec_properties_copy)
+    trainer_fn = self._GetFn(exec_properties_copy, 'trainer_fn')
 
     schema = io_utils.parse_pbtxt_file(fn_args.schema_file, schema_pb2.Schema())
 

@@ -17,6 +17,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import json
 from typing import Any, Dict, Optional, Text, Union
 
 import absl
@@ -124,7 +125,7 @@ class Pusher(base_component.BaseComponent):
         model_blessing=model_blessing,
         infra_blessing=infra_blessing,
         push_destination=push_destination,
-        custom_config=custom_config,
+        custom_config=json.dumps(custom_config),
         pushed_model=output)
     super(Pusher, self).__init__(
         spec=spec,

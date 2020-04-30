@@ -27,6 +27,7 @@ from google.cloud import bigquery
 from tfx.extensions.google_cloud_big_query_ml.pusher.executor import Executor
 from tfx.types import standard_artifacts
 from tfx.utils import io_utils
+from tfx.utils import json_utils
 
 
 class ExecutorTest(tf.test.TestCase):
@@ -86,8 +87,9 @@ class ExecutorTest(tf.test.TestCase):
   def testPipelineRoot(self):
     self._model_push.uri = '/none_gcs_pipeline_root'
     with self.assertRaises(ValueError):
-      self._executor.Do(self._input_dict, self._output_dict,
-                        self._exec_properties)
+      self._executor.Do(
+          self._input_dict, self._output_dict,
+          json_utils.serialize_custom_config(self._exec_properties))
 
   def testBigQueryServingArgs(self):
     temp_exec_properties = {
@@ -95,20 +97,21 @@ class ExecutorTest(tf.test.TestCase):
         'push_destination': None,
     }
     with self.assertRaises(ValueError):
-      self._executor.Do(self._input_dict, self._output_dict,
-                        temp_exec_properties)
+      self._executor.Do(
+          self._input_dict, self._output_dict,
+          json_utils.serialize_custom_config(temp_exec_properties))
 
   def testDoBlessed(self):
     self.mock_check_blessing.return_value = True
     self._executor.Do(self._input_dict, self._output_dict,
-                      self._exec_properties)
+                      json_utils.serialize_custom_config(self._exec_properties))
     self.mock_bq.assert_called_once()
     self.assertPushed()
 
   def testDoNotBlessed(self):
     self.mock_check_blessing.return_value = False
     self._executor.Do(self._input_dict, self._output_dict,
-                      self._exec_properties)
+                      json_utils.serialize_custom_config(self._exec_properties))
     self.mock_bq.assert_not_called()
     self.assertNotPushed()
 

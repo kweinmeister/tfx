@@ -19,6 +19,7 @@ from __future__ import division
 from __future__ import print_function
 
 import abc
+import copy
 import importlib
 import inspect
 import json
@@ -36,6 +37,7 @@ _TFX_OBJECT_TYPE_KEY = '__tfx_object_type__'
 _MODULE_KEY = '__module__'
 _CLASS_KEY = '__class__'
 _PROTO_VALUE_KEY = '__proto_value__'
+_CUSTOM_CONFIG_KEY = 'custom_config'
 
 RUNTIME_PARAMETER_PATTERN = (r'({\\*"__class__\\*": \\*"RuntimeParameter\\*", '
                              r'.*?})')
@@ -191,3 +193,53 @@ def dumps(obj: Any) -> Text:
 def loads(s: Text) -> Any:
   """Loads a JSON into an object with Jsonable decoding."""
   return json.loads(s, cls=_DefaultDecoder)
+
+
+def deserialize_custom_config(
+    exec_properties: Dict[Text, Any]) -> Dict[Text, Any]:
+  """Deserializes exec_properties['custom_config'] into a dict object.
+
+  Args:
+    exec_properties: Execution properties, should be a mapping from string to a
+      primitive typed value.
+
+  Returns:
+    A copy of exec_properties with 'custom_config' deserialized into a dict.
+
+  Raises:
+    ValueError: if custom config cannot be correctly deserilzed into a dict.
+  """
+  properties = copy.deepcopy(exec_properties)
+  custom_config = json.loads(properties.get(_CUSTOM_CONFIG_KEY, 'null'))
+  if custom_config is None:
+    # Custom config not found, return the original exec_properties.
+    return properties
+  if not isinstance(custom_config, Dict):
+    raise ValueError('custom_config in execution properties needs to be a '
+                     'dict.')
+
+  properties[_CUSTOM_CONFIG_KEY] = custom_config
+  return properties
+
+
+def serialize_custom_config(
+    exec_properties: Dict[Text, Any]) -> Dict[Text, Any]:
+  """Serializes the exec_properties['custom_config'] into a JSON string.
+
+  Args:
+    exec_properties: Execution properties, where
+    exec_properties['custom_config'] is a dict object.
+
+  Returns:
+    A copy of exec_properties with 'custom_config' serialized into a string (if
+    exists).
+  """
+  result = copy.deepcopy(exec_properties)
+  custom_config = result.get(_CUSTOM_CONFIG_KEY)
+  # Custom config needs to be dumped even when it's an empty dict, so that
+  # down-stream logic can correctly distinguish between {} and None and decide
+  # whether to use default arguments.
+  if custom_config is not None:
+    result[_CUSTOM_CONFIG_KEY] = json.dumps(custom_config, sort_keys=True)
+
+  return result

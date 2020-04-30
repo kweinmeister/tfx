@@ -20,6 +20,8 @@
 ### Deprecations
 
 ## Breaking changes
+*   Changed custom config for the Do function of Trainer and Pusher to accepting
+    a JSON-serialized dict instead of a dict object.
 
 ### For pipeline authors
 
