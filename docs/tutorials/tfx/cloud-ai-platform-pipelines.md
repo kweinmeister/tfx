@@ -845,7 +845,7 @@ dataset. Now try putting your own data into the pipeline. Your data can be
 stored anywhere the pipeline can access it, including Google Cloud Storage,
 BigQuery, or CSV files.
 
-You need to modify the pipeline definition to accomodate your data.
+You need to modify the pipeline definition to accommodate your data.
 
 ### If your data is stored in files
 
